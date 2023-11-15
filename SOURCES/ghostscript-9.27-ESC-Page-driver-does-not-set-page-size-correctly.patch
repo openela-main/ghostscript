@@ -1,0 +1,22 @@
+diff -x .git -Napur ghostscript-9.27.old/contrib/japanese/gdevespg.c ghostscript-9.27.new/contrib/japanese/gdevespg.c
+--- ghostscript-9.27.old/contrib/japanese/gdevespg.c	2019-04-04 00:43:14.000000000 -0700
++++ ghostscript-9.27.new/contrib/japanese/gdevespg.c	2023-01-24 11:25:32.588189093 -0800
+@@ -273,6 +273,9 @@ escpage_paper_set(gx_device_printer * pd
+     int width, height, w, h, wp, hp, bLandscape;
+     EpagPaperTable *pt;
+ 
++    /* Page size match tolerance in points */
++    #define TOL 5
++
+     width = pdev->MediaSize[0];
+     height = pdev->MediaSize[1];
+ 
+@@ -291,7 +294,7 @@ escpage_paper_set(gx_device_printer * pd
+     }
+ 
+     for (pt = epagPaperTable; pt->escpage > 0; pt++)
+-        if (pt->width == w && pt->height == h)
++      if (abs(w - pt->width) <= TOL && abs(h - pt->height) <= TOL)
+             break;
+ 
+     fprintf(fp, "%c%d", GS, pt->escpage);

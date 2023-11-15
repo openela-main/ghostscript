@@ -1,0 +1,16 @@
+diff -Napur '--exclude=.git' ghostscript-9.27.old/devices/vector/opdfread.ps ghostscript-9.27.new/devices/vector/opdfread.ps
+--- ghostscript-9.27.old/devices/vector/opdfread.ps	2019-04-04 00:43:14.000000000 -0700
++++ ghostscript-9.27.new/devices/vector/opdfread.ps	2022-06-14 17:44:27.963033829 -0700
+@@ -998,10 +998,10 @@ currentdict end readonly def
+   } if                                                  % id obj node
+   1 index exch /Context exch put                        % id obj
+   dup /ImmediateExec true put
+-  dup /IsPage true put
+-  SetPageSize {dup /Context get //SetupPageView exec} if
+   % This gets restored at the end of ExecuteStream if IsPage is true.
+   /pagesave save def
++  dup /IsPage true put
++  SetPageSize {dup /Context get //SetupPageView exec} if
+ } bind def
+ 
+ /FontFileDaemon % <id> <obj> <font_descriptor> FontFileDaemon <id> <obj>
