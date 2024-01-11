@@ -37,7 +37,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          9.27
-Release:          6%{?dist}
+Release:          11%{?dist}
 
 License:          AGPLv3+
 
@@ -107,6 +107,11 @@ Patch014: ghostscript-cve-2020-16301.patch
 Patch015: ghostscript-9.27-fix-use-of-HWMargins.patch
 Patch016: ghostscript-9.27-Deal-with-different-VM-modes-during-CIDFont-loading.patch
 Patch017: ghostscript-9.27-ESC-Page-driver-does-not-set-page-size-correctly.patch
+Patch018: ghostscript-9.27-fix-bbox.patch
+Patch019: ghostscript-9.27-pdfwrite-Substituted-TTF-CIDFont-CID-hand.patch
+Patch020: ghostscript-9.27-CVE-2023-28879.patch
+Patch021: ghostscript-9.27-CVE-2023-38559.patch
+Patch022: ghostscript-9.27-CVE-2023-4042.patch
 
 
 # Downstream patches -- these should be always included when doing rebase:
@@ -447,6 +452,26 @@ done
 # =============================================================================
 
 %changelog
+* Fri Aug 04 2023 Richard Lescak <rlescak@redhat.com> - 9.27-11
+- fix for CVE-2023-4042
+- Resolves: rhbz#2228153
+
+* Fri Aug 04 2023 Richard Lescak <rlescak@redhat.com> - 9.27-10
+- fix for CVE-2023-38559
+- Resolves: rhbz#2224371
+
+* Fri May 05 2023 Richard Lescak <rlescak@redhat.com> - 9.27-9
+- fix for CVE-2023-28879
+- Resolves: rhbz#2188297
+
+* Fri Mar 17 2023 Richard Lescak <rlescak@redhat.com> - 9.27-8
+- fix embedding of CIDFonts
+- Resolves: rhbz#2169890
+
+* Wed Mar 15 2023 Richard Lescak <rlescak@redhat.com> - 9.27-7
+- fix bbox device calculating bounding box incorrectly
+- Resolves: rhbz#2176327
+
 * Thu Feb 02 2023 Richard Lescak <rlescak@redhat.com> - 9.27-6
 - set the page size for A4 correctly in ESC/Page driver
 - Resolves: rhbz#2164603
