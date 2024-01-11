@@ -42,7 +42,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          9.54.0
-Release:          10%{?dist}
+Release:          14%{?dist}
 
 License:          AGPLv3+
 
@@ -108,7 +108,11 @@ Patch003: ghostscript-9.54.0-covscan-fixes.patch
 Patch004: ghostscript-9.54.0-Fix-op-stack-management-in-sampled_data_c.patch
 Patch005: ghostscript-9.54.0-Deal-with-different-VM-modes-during-CIDFont-loading.patch
 Patch006: ghostscript-9.54.0-ESC-Page-driver-does-not-set-page-size-correctly.patch
-Patch007: ghostscript-9.54.0-CVE-2023-36664.patch
+Patch007: ghostscript-9.54.0-pdfwrite-Substituted-TTF-CIDFont-CID-hand.patch
+Patch008: ghostscript-9.54.0-CVE-2023-28879.patch
+Patch009: ghostscript-9.54.0-CVE-2023-36664.patch
+Patch010: ghostscript-9.54.0-CVE-2023-38559.patch
+Patch011: ghostscript-9.54.0-CVE-2023-43115.patch
 
 # Downstream patches -- these should be always included when doing rebase:
 # ------------------
@@ -442,9 +446,25 @@ done
 # =============================================================================
 
 %changelog
-* Mon Jul 03 2023 Richard Lescak <rlescak@redhat.com> - 9.54.0-10
+* Thu Oct 12 2023 Richard Lescak <rlescak@redhat.com> - 9.54.0-14
+- fix for CVE-2023-43115
+- Resolves: RHEL-10184
+
+* Fri Aug 04 2023 Richard Lescak <rlescak@redhat.com> - 9.54.0-13
+- fix for CVE-2023-38559
+- Resolves: rhbz#2224372
+
+* Tue Aug 01 2023 Richard Lescak <rlescak@redhat.com> - 9.54.0-12
 - fix for CVE-2023-36664
-- Resolves: rhbz#2217809
+- Resolves: rhbz#2217810
+
+* Fri May 05 2023 Richard Lescak <rlescak@redhat.com> - 9.54.0-11
+- fix for CVE-2023-28879
+- Resolves: rhbz#2188300
+
+* Fri Mar 17 2023 Richard Lescak <rlescak@redhat.com> - 9.54.0-10
+- fix embedding of CIDFonts
+- Resolves: rhbz#2179023
 
 * Thu Feb 02 2023 Richard Lescak <rlescak@redhat.com> - 9.54.0-9
 - set the page size for A4 correctly in ESC/Page driver
