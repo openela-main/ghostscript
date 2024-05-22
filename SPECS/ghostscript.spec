@@ -37,7 +37,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          9.27
-Release:          11%{?dist}
+Release:          12%{?dist}
 
 License:          AGPLv3+
 
@@ -112,6 +112,7 @@ Patch019: ghostscript-9.27-pdfwrite-Substituted-TTF-CIDFont-CID-hand.patch
 Patch020: ghostscript-9.27-CVE-2023-28879.patch
 Patch021: ghostscript-9.27-CVE-2023-38559.patch
 Patch022: ghostscript-9.27-CVE-2023-4042.patch
+Patch023: ghostscript-9.27-avoid-divide-by-zero-in-devices.patch
 
 
 # Downstream patches -- these should be always included when doing rebase:
@@ -452,6 +453,10 @@ done
 # =============================================================================
 
 %changelog
+* Tue Sep 19 2023 Richard Lescak <rlescak@redhat.com> - 9.27-12
+- fix to prevent divison by zero in devices
+- Resolves: rhbz#2235009
+
 * Fri Aug 04 2023 Richard Lescak <rlescak@redhat.com> - 9.27-11
 - fix for CVE-2023-4042
 - Resolves: rhbz#2228153
