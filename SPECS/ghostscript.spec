@@ -37,7 +37,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          9.27
-Release:          12%{?dist}
+Release:          13%{?dist}
 
 License:          AGPLv3+
 
@@ -113,6 +113,16 @@ Patch020: ghostscript-9.27-CVE-2023-28879.patch
 Patch021: ghostscript-9.27-CVE-2023-38559.patch
 Patch022: ghostscript-9.27-CVE-2023-4042.patch
 Patch023: ghostscript-9.27-avoid-divide-by-zero-in-devices.patch
+# RHEL-38837 CVE-2024-33871 ghostscript: OPVP device arbitrary code execution via custom Driver library
+# the patch is based on upstream code from 9.50, where a new -dSAFER implementation was introduced and
+# -dSAFER was made default for any gs calls. To do not backport the whole new -dSAFER implementation,
+# to do not collide with any future backports related with -dSAFER and to do not change the current default
+# for ghostscript in RHEL 8, only part of the new -dSAFER implementation was backported,
+# and the several functions, variables and macros prefix was changed to 'opvp' and used only
+# for OPVP device, which results in changing the default only for this device and fixing the CVE.
+# Downside of the fix is if someone depends on unsafe settings of driver for OPVP device
+# (via Postscript code in command -c, via Postscript code in input file), gs will start to fail.
+Patch024: gs-cve-2024-33871.patch
 
 
 # Downstream patches -- these should be always included when doing rebase:
@@ -453,6 +463,9 @@ done
 # =============================================================================
 
 %changelog
+* Wed Jun 12 2024 Zdenek Dohnal <zdohnal@redhat.com> - 9.27-13
+- CVE-2024-33871 ghostscript: OPVP device arbitrary code execution via custom Driver library
+
 * Tue Sep 19 2023 Richard Lescak <rlescak@redhat.com> - 9.27-12
 - fix to prevent divison by zero in devices
 - Resolves: rhbz#2235009
