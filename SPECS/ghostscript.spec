@@ -42,7 +42,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          9.54.0
-Release:          14%{?dist}
+Release:          16%{?dist}
 
 License:          AGPLv3+
 
@@ -113,6 +113,8 @@ Patch008: ghostscript-9.54.0-CVE-2023-28879.patch
 Patch009: ghostscript-9.54.0-CVE-2023-36664.patch
 Patch010: ghostscript-9.54.0-CVE-2023-38559.patch
 Patch011: ghostscript-9.54.0-CVE-2023-43115.patch
+# RHEL-39110 CVE-2024-33871 ghostscript: OPVP device arbitrary code execution via custom Driver library
+Patch012: gs-cve-2024-33871.patch
 
 # Downstream patches -- these should be always included when doing rebase:
 # ------------------
@@ -446,9 +448,15 @@ done
 # =============================================================================
 
 %changelog
-* Thu Oct 12 2023 Richard Lescak <rlescak@redhat.com> - 9.54.0-14
+* Thu Jun 13 2024 Zdenek Dohnal <zdohnal@redhat.com> - 9.54.0-16
+- RHEL-39110 fix regression discovered in OPVP device
+
+* Fri Jun 07 2024 Zdenek Dohnal <zdohnal@redhat.com> - 9.54.0-15
+- RHEL-39110 CVE-2024-33871 ghostscript: OPVP device arbitrary code execution via custom Driver library
+
+* Fri Oct 27 2023 Richard Lescak <rlescak@redhat.com> - 9.54.0-14
 - fix for CVE-2023-43115
-- Resolves: RHEL-10184
+- Resolves: RHEL-10185
 
 * Fri Aug 04 2023 Richard Lescak <rlescak@redhat.com> - 9.54.0-13
 - fix for CVE-2023-38559
