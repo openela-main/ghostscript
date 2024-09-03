@@ -42,7 +42,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          9.54.0
-Release:          16%{?dist}
+Release:          17%{?dist}
 
 License:          AGPLv3+
 
@@ -115,6 +115,12 @@ Patch010: ghostscript-9.54.0-CVE-2023-38559.patch
 Patch011: ghostscript-9.54.0-CVE-2023-43115.patch
 # RHEL-39110 CVE-2024-33871 ghostscript: OPVP device arbitrary code execution via custom Driver library
 Patch012: gs-cve-2024-33871.patch
+# RHEL-44759 CVE-2024-33870 ghostscript: path traversal to arbitrary files if the current directory is in the permitted paths
+Patch013: gs-CVE-2024-33870.patch
+# RHEL-44745 CVE-2024-33869 ghostscript: path traversal and command execution due to path reduction
+Patch014: gs-CVE-2024-33869.patch
+# RHEL-44731 CVE-2024-29510 ghostscript: format string injection leads to shell command execution (SAFER bypass)
+Patch015: 0001-Uniprint-device-prevent-string-configuration-changes.patch
 
 # Downstream patches -- these should be always included when doing rebase:
 # ------------------
@@ -448,6 +454,11 @@ done
 # =============================================================================
 
 %changelog
+* Mon Jul 08 2024 Zdenek Dohnal <zdohnal@redhat.com> - 9.54.0-17
+- RHEL-44759 CVE-2024-33870 ghostscript: path traversal to arbitrary files if the current directory is in the permitted paths
+- RHEL-44745 CVE-2024-33869 ghostscript: path traversal and command execution due to path reduction
+- RHEL-44731 CVE-2024-29510 ghostscript: format string injection leads to shell command execution (SAFER bypass)
+
 * Thu Jun 13 2024 Zdenek Dohnal <zdohnal@redhat.com> - 9.54.0-16
 - RHEL-39110 fix regression discovered in OPVP device
 
