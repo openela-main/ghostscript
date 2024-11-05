@@ -1,0 +1,101 @@
+From b772aaf901a3cd37baf5c06eb141c689829bf673 Mon Sep 17 00:00:00 2001
+From: Robin Watts <Robin.Watts@artifex.com>
+Date: Tue, 26 Nov 2019 14:35:05 +0000
+Subject: [PATCH] Bug 701949: Add 'omitEOD' flag to RLE compressor and use for
+ PXL.
+
+It turns out that some printers (Samsung ML-2250 and Canon
+ImageRunner iRC2380i at least) object to the EOD byte appearing
+in RLE data in PXL streams.
+
+Ken kindly checked the PXL spec for me, and found that: "The PXL
+spec does say a control code of -128 is ignored and not included
+in the decompressed data and the byte following a control byte
+of 128 (I assume they mean -128 here) is treated as the next
+control byte. And PCL only uses RLE data for images, so they do
+know how much data they expect."
+
+Thus, the conclusion we reached is that PCL/PXL don't need
+(indeed, really does not want) the EOD byte.
+
+The Postscript spec clearly defines the EOD byte though. Rather
+than break the streams for postscript, we introduce a flag
+'omitEOD' that can be set for the encoder when we want to produce
+a stream for use with PCL/PXL.
+---
+ base/srle.c             | 10 ++++++----
+ base/srlx.h             |  3 ++-
+ devices/vector/gdevpx.c |  1 +
+ psi/zfilter.c           |  1 +
+ 4 files changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/base/srle.c b/base/srle.c
+index 0c0186e04..21b729f31 100644
+--- a/base/srle.c
++++ b/base/srle.c
+@@ -329,11 +329,13 @@ run_len_0_n0_read:
+                 *++q = n0;
+             }
+     case state_eod_unmarked:
+-            if (wlimit - q < 1) {
+-                ss->state = state_eod_unmarked;
+-                goto no_output_room;
++            if (!ss->omitEOD) {
++                if (wlimit - q < 1) {
++                    ss->state = state_eod_unmarked;
++                    goto no_output_room;
++                }
++                *++q = 128; /* EOD */
+             }
+-            *++q = 128; /* EOD */
+     case state_eod:
+             ss->run_len = 0;
+             ss->state = state_0;
+diff --git a/base/srlx.h b/base/srlx.h
+index ebf172064..98309dbdb 100644
+--- a/base/srlx.h
++++ b/base/srlx.h
+@@ -32,6 +32,7 @@ typedef struct stream_RLE_state_s {
+     stream_RL_state_common;
+     /* The following parameters are set by the client. */
+     ulong record_size;
++    bool omitEOD;
+     /* The following change dynamically. */
+     ulong record_left;		/* bytes left in current record */
+     byte n0;
+@@ -47,7 +48,7 @@ typedef struct stream_RLE_state_s {
+ /* We define the initialization procedure here, so that clients */
+ /* can avoid a procedure call. */
+ #define s_RLE_set_defaults_inline(ss)\
+-  ((ss)->EndOfData = true, (ss)->record_size = 0)
++  ((ss)->EndOfData = true, (ss)->omitEOD = false, (ss)->record_size = 0)
+ #define s_RLE_init_inline(ss)\
+   ((ss)->record_left =\
+    ((ss)->record_size == 0 ? ((ss)->record_size = max_uint) :\
+diff --git a/devices/vector/gdevpx.c b/devices/vector/gdevpx.c
+index 5d2d0edf5..a1fce1b7c 100644
+--- a/devices/vector/gdevpx.c
++++ b/devices/vector/gdevpx.c
+@@ -741,6 +741,7 @@ pclxl_write_image_data_RLE(gx_device_pclxl * xdev, const byte * base,
+             goto nc;
+         s_RLE_set_defaults_inline(&rlstate);
+         rlstate.EndOfData = false;
++        rlstate.omitEOD = true;
+         s_RLE_init_inline(&rlstate);
+         w.ptr = buf - 1;
+         w.limit = w.ptr + num_bytes;
+diff --git a/psi/zfilter.c b/psi/zfilter.c
+index dfe3a1d5b..3ce7652c6 100644
+--- a/psi/zfilter.c
++++ b/psi/zfilter.c
+@@ -109,6 +109,7 @@ zRLE(i_ctx_t *i_ctx_p)
+     stream_RLE_state state;
+     int code;
+ 
++    s_RLE_template.set_defaults((stream_state *)&state);
+     check_op(2);
+     code = rl_setup(op - 1, &state.EndOfData);
+     if (code < 0)
+-- 
+2.47.0
+

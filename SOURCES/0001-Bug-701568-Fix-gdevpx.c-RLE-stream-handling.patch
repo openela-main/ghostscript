@@ -1,0 +1,64 @@
+From 68c7275d4a580dca6c0ed3798f3717eea3513403 Mon Sep 17 00:00:00 2001
+From: Robin Watts <Robin.Watts@artifex.com>
+Date: Thu, 12 Sep 2019 09:35:01 +0100
+Subject: [PATCH] Bug 701568: Fix gdevpx.c RLE stream handling.
+
+The current code in pclxl_write_image_data_RLE passes
+lines of data to the RLE compression routine. It tells
+each invocation of that routine that this is the "last"
+block of data, when clearly it is not.
+
+Accordingly, the compression routine inserts the "EOD" byte
+into the stream, and returns EOFC.
+
+Independently of the return value used, having multiple EOD
+bytes in the data is clearly wrong. Update the caller to only
+pass "last" in for the last block.
+
+The code still returns EOFC at the end of the data, so update
+this final call to accept (indeed, expect) that return value
+there.
+---
+ devices/vector/gdevpx.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/devices/vector/gdevpx.c b/devices/vector/gdevpx.c
+index 825e6b4c5..5d2d0edf5 100644
+--- a/devices/vector/gdevpx.c
++++ b/devices/vector/gdevpx.c
+@@ -714,6 +714,7 @@ pclxl_write_image_data_RLE(gx_device_pclxl * xdev, const byte * base,
+     uint num_bytes = ROUND_UP(width_bytes, 4) * height;
+     bool compress = num_bytes >= 8;
+     int i;
++    int code;
+ 
+     /* cannot handle data_bit not multiple of 8, but we don't invoke this routine that way */
+     int offset = data_bit >> 3;
+@@ -752,19 +753,20 @@ pclxl_write_image_data_RLE(gx_device_pclxl * xdev, const byte * base,
+             r.ptr = data + i * raster - 1;
+             r.limit = r.ptr + width_bytes;
+             if ((*s_RLE_template.process)
+-                ((stream_state *) & rlstate, &r, &w, true) != 0 ||
++                ((stream_state *) & rlstate, &r, &w, false) != 0 ||
+                 r.ptr != r.limit)
+                 goto ncfree;
+             r.ptr = (const byte *)"\000\000\000\000\000";
+             r.limit = r.ptr + (-(int)width_bytes & 3);
+             if ((*s_RLE_template.process)
+-                ((stream_state *) & rlstate, &r, &w, true) != 0 ||
++                ((stream_state *) & rlstate, &r, &w, false) != 0 ||
+                 r.ptr != r.limit)
+                 goto ncfree;
+         }
+         r.ptr = r.limit;
+-        if ((*s_RLE_template.process)
+-            ((stream_state *) & rlstate, &r, &w, true) != 0)
++        code = (*s_RLE_template.process)
++            ((stream_state *) & rlstate, &r, &w, true);
++        if (code != EOFC && code != 0)
+             goto ncfree;
+         {
+             uint count = w.ptr + 1 - buf;
+-- 
+2.46.2
+

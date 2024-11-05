@@ -37,7 +37,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          9.27
-Release:          13%{?dist}
+Release:          15%{?dist}
 
 License:          AGPLv3+
 
@@ -123,6 +123,13 @@ Patch023: ghostscript-9.27-avoid-divide-by-zero-in-devices.patch
 # Downside of the fix is if someone depends on unsafe settings of driver for OPVP device
 # (via Postscript code in command -c, via Postscript code in input file), gs will start to fail.
 Patch024: gs-cve-2024-33871.patch
+# RHEL-61729 Ghostscript is generating PJL of a significantly larger size
+# Patches: 0001-Bug-701568-Fix-gdevpx.c-RLE-stream-handling.patch
+#          0001-Bug-701568-followup-Fix-RLE-compressor.patch
+#          0001-Bug-701949-Add-omitEOD-flag-to-RLE-compressor-and-us.patch
+Patch025: 0001-Bug-701568-Fix-gdevpx.c-RLE-stream-handling.patch
+Patch026: 0001-Bug-701568-followup-Fix-RLE-compressor.patch
+Patch027: 0001-Bug-701949-Add-omitEOD-flag-to-RLE-compressor-and-us.patch
 
 
 # Downstream patches -- these should be always included when doing rebase:
@@ -463,6 +470,12 @@ done
 # =============================================================================
 
 %changelog
+* Mon Oct 14 2024 Zdenek Dohnal <zdohnal@redhat.com> - 9.27-15
+- fix printing PCL XL on some printers
+
+* Thu Oct 10 2024 Zdenek Dohnal <zdohnal@redhat.com> - 9.27-14
+- RHEL-61729 Ghostscript is generating PJL of a significantly larger size
+
 * Wed Jun 12 2024 Zdenek Dohnal <zdohnal@redhat.com> - 9.27-13
 - CVE-2024-33871 ghostscript: OPVP device arbitrary code execution via custom Driver library
 
