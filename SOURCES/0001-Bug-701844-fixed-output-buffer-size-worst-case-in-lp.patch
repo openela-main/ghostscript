@@ -1,0 +1,31 @@
+From 4f6bc662909ab79e8fbe9822afb36e8a0eafc2b7 Mon Sep 17 00:00:00 2001
+From: Julian Smith <jules@op59.net>
+Date: Wed, 6 Nov 2019 12:41:28 +0000
+Subject: [PATCH] Bug 701844: fixed output buffer size worst case in
+ lp8000_print_page().
+
+Fixes:
+    ./sanbin/gs -dBATCH -dNOPAUSE -dSAFER -dFIXEDMEDIA -sPAPERSIZE=legal -sOutputFile=tmp -sDEVICE=lp8000 ../bug-701844.pdf
+---
+ devices/gdevlp8k.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/devices/gdevlp8k.c b/devices/gdevlp8k.c
+index 0a9bc03c8..55af94df0 100644
+--- a/devices/gdevlp8k.c
++++ b/devices/gdevlp8k.c
+@@ -185,7 +185,10 @@ lp8000_print_page(gx_device_printer *pdev, gp_file *prn_stream)
+         unsigned int report_size;
+ 
+         byte *buf1 = (byte *)gs_malloc(pdev->memory, in_size, 1, "lp8000_print_page(buf1)");
+-        byte *buf2 = (byte *)gs_malloc(pdev->memory, in_size, 1, "lp8000_print_page(buf2)");
++
++        /* Worst case for rle compression below is 3 bytes for each 2 bytes of
++        input, with extra final byte. */
++        byte *buf2 = (byte *)gs_malloc(pdev->memory, in_size * 3 / 2 + 2, 1, "lp8000_print_page(buf2)");
+         byte *in = buf1;
+         byte *out = buf2;
+ 
+-- 
+2.49.0
+

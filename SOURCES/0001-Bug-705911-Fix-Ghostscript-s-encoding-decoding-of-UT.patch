@@ -1,0 +1,239 @@
+From 4fcf527584da20538ebf9c3c43c3fda25d97cd18 Mon Sep 17 00:00:00 2001
+From: Robin Watts <Robin.Watts@artifex.com>
+Date: Tue, 4 Oct 2022 17:36:56 +0100
+Subject: [PATCH] Bug 705911: Fix Ghostscript's encoding/decoding of UTF-8 from
+ UTF-16.
+
+We were not coping with high/low surrogate pairs in UTF-16,
+meaning that we could encode/decode strings fine for our own
+purposes, but when we passed them off to other users (such
+as SmartOffice), it would fail to understand our utf-8 encoded
+surrogate pairs.
+
+Thanks to Pete, Joseph and Fred for their help here, and to Silver
+for having spotted it!
+---
+ base/gp_wutf8.c | 162 +++++++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 127 insertions(+), 35 deletions(-)
+
+diff --git a/base/gp_wutf8.c b/base/gp_wutf8.c
+index b7b1d0758..920114cd1 100644
+--- a/base/gp_wutf8.c
++++ b/base/gp_wutf8.c
+@@ -16,6 +16,56 @@
+ 
+ #include "windows_.h"
+ 
++static int
++decode_utf8(const char **inp, unsigned int i)
++{
++    const char *in = *inp;
++    unsigned char c;
++
++    if (i < 0x80) {
++    } else if ((i & 0xE0) == 0xC0) {
++        i &= 0x1F;
++        c = (unsigned char)*in++;
++        if ((c & 0xC0) != 0x80)
++            goto fail;
++        i = (i<<6) | (c & 0x3f);
++    } else if ((i & 0xF0) == 0xE0) {
++        i &= 0xF;
++        c = (unsigned char)*in++;
++        if ((c & 0xC0) != 0x80)
++            goto fail;
++        i = (i<<6) | (c & 0x3f);
++        c = (unsigned char)*in++;
++        if ((c & 0xC0) != 0x80)
++            goto fail;
++        i = (i<<6) | (c & 0x3f);
++    } else if ((i & 0xF8) == 0xF0) {
++        i &= 0x7;
++        c = (unsigned char)*in++;
++        if ((c & 0xC0) != 0x80)
++            goto fail;
++        i = (i<<6) | (c & 0x3f);
++        c = (unsigned char)*in++;
++        if ((c & 0xC0) != 0x80)
++            goto fail;
++        i = (i<<6) | (c & 0x3f);
++        c = (unsigned char)*in++;
++        if ((c & 0xC0) != 0x80)
++            goto fail;
++        i = (i<<6) | (c & 0x3f);
++    }
++    if (0)
++    {
++        /* If we fail, unread the last one, and return the unicode replacement char. */
++fail:
++       in--;
++       i = 0xfffd;
++    }
++    *inp = in;
++
++    return i;
++}
++
+ int utf8_to_wchar(wchar_t *out, const char *in)
+ {
+     unsigned int i;
+@@ -24,47 +74,37 @@ int utf8_to_wchar(wchar_t *out, const char *in)
+ 
+     if (out) {
+         while (i = *(unsigned char *)in++) {
+-            if (i < 0x80) {
+-                *out++ = (wchar_t)i;
+-                len++;
+-            } else if ((i & 0xE0) == 0xC0) {
+-                i &= 0x1F;
+-                c = (unsigned char)*in++;
+-                if ((c & 0xC0) != 0x80)
+-                    return -1;
+-                i = (i<<6) | (c & 0x3f);
+-                *out++ = (wchar_t)i;
+-                len++;
+-            } else if ((i & 0xF0) == 0xE0) {
+-                i &= 0xF;
+-                c = (unsigned char)*in++;
+-                if ((c & 0xC0) != 0x80)
+-                    return -1;
+-                i = (i<<6) | (c & 0x3f);
+-                c = (unsigned char)*in++;
+-                if ((c & 0xC0) != 0x80)
+-                    return -1;
+-                i = (i<<6) | (c & 0x3f);
+-                *out++ = (wchar_t)i;
++            /* Decode UTF-8 */
++            i = decode_utf8(&in, i);
++
++            /* Encode, allowing for surrogates. */
++            if (i >= 0x10000 && i <= 0x10ffff)
++            {
++                i -= 0x10000;
++                *out++ = 0xd800 + (i>>10);
++                *out++ = 0xdc00 + (i & 0x3ff);
+                 len++;
+-            } else {
++            }
++            else if (i > 0x10000)
++            {
+                 return -1;
+             }
++            else
++                *out++ = (wchar_t)i;
++            len++;
+         }
+         *out = 0;
+     } else {
+         while (i = *(unsigned char *)in++) {
+-            if (i < 0x80) {
+-                len++;
+-            } else if ((i & 0xE0) == 0xC0) {
+-                in++;
+-                len++;
+-            } else if ((i & 0xF0) == 0xE0) {
+-                in+=2;
++            /* Decode UTF-8 */
++            i = decode_utf8(&in, i);
++
++            /* Encode, allowing for surrogates. */
++            if (i >= 0x10000 && i <= 0x10ffff)
+                 len++;
+-            } else {
++            else if (i > 0x10000)
+                 return -1;
+-            }
++            len++;
+         }
+     }
+     return len;
+@@ -74,9 +114,32 @@ int wchar_to_utf8(char *out, const wchar_t *in)
+ {
+     unsigned int i;
+     unsigned int len = 1;
++    int hi = -1;
+ 
+     if (out) {
+         while (i = (unsigned int)*in++) {
++            /* Decode surrogates */
++            if (i >= 0xD800 && i <= 0xDBFF)
++            {
++                /* High surrogate. Must be followed by a low surrogate, or this is a failure. */
++                int hi = i & 0x3ff;
++                int j = (unsigned int)*in++;
++                if (j == 0 || (j <= 0xDC00 || j >= 0xDFFF))
++                {
++                    /* Failure! Unicode replacement char! */
++                    in--;
++                    i = 0xfffd;
++                } else {
++                    /* Decode surrogates */
++                    i = 0x10000 + (hi<<10) + (j & 0x3ff);
++                }
++            } else if (i >= 0xDC00 && i <= 0xDFFF)
++            {
++                /* Lone low surrogate. Failure. Unicode replacement char. */
++                i = 0xfffd;
++            }
++
++            /* Encode output */
+             if (i < 0x80) {
+                 *out++ = (char)i;
+                 len++;
+@@ -84,22 +147,51 @@ int wchar_to_utf8(char *out, const wchar_t *in)
+                 *out++ = 0xC0 | ( i>> 6        );
+                 *out++ = 0x80 | ( i      & 0x3F);
+                 len+=2;
+-            } else /* if (i < 0x10000) */ {
++            } else if (i < 0x10000) {
+                 *out++ = 0xE0 | ( i>>12        );
+                 *out++ = 0x80 | ((i>> 6) & 0x3F);
+                 *out++ = 0x80 | ( i      & 0x3F);
+                 len+=3;
++            } else {
++                *out++ = 0xF0 | ( i>>18        );
++                *out++ = 0x80 | ((i>>12) & 0x3F);
++                *out++ = 0x80 | ((i>> 6) & 0x3F);
++                *out++ = 0x80 | ( i      & 0x3F);
++                len+=4;
+             }
+         }
+         *out = 0;
+     } else {
+         while (i = (unsigned int)*in++) {
++            /* Decode surrogates */
++            if (i >= 0xD800 && i <= 0xDBFF)
++            {
++                /* High surrogate. Must be followed by a low surrogate, or this is a failure. */
++                int hi = i & 0x3ff;
++                int j = (unsigned int)*in++;
++                if (j == 0 || (j <= 0xDC00 || j >= 0xDFFF))
++                {
++                    /* Failure! Unicode replacement char! */
++                    in--;
++                    i = 0xfffd;
++                } else {
++                    /* Decode surrogates */
++                    i = 0x10000 + (hi<<10) + (j & 0x3ff);
++                }
++            } else if (i >= 0xDC00 && i <= 0xDFFF)
++            {
++                /* Lone low surrogate. Failure. Unicode replacement char. */
++                i = 0xfffd;
++            }
++
+             if (i < 0x80) {
+                 len++;
+             } else if (i < 0x800) {
+                 len += 2;
+-            } else /* if (i < 0x10000) */ {
++            } else if (i < 0x10000) {
+                 len += 3;
++            } else {
++                len += 4;
+             }
+         }
+     }
+-- 
+2.49.0
+

@@ -37,7 +37,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          9.27
-Release:          15%{?dist}
+Release:          16%{?dist}
 
 License:          AGPLv3+
 
@@ -130,6 +130,26 @@ Patch024: gs-cve-2024-33871.patch
 Patch025: 0001-Bug-701568-Fix-gdevpx.c-RLE-stream-handling.patch
 Patch026: 0001-Bug-701568-followup-Fix-RLE-compressor.patch
 Patch027: 0001-Bug-701949-Add-omitEOD-flag-to-RLE-compressor-and-us.patch
+# RHEL-18396 CVE-2023-46751 ghostscript: dangling pointer in gdev_prn_open_printer_seekable()
+# partially taken from https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=dcdbc595c13c9
+Patch028: gs-CVE-2023-46751.patch
+# RHEL-67046 CVE-2024-46951 ghostscript: Arbitrary Code Execution in Artifex Ghostscript Pattern Color Space
+# https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=f49812186baa7
+Patch029: 0001-PS-interpreter-check-the-type-of-the-Pattern-Impleme.patch
+# RHEL-15067 CVE-2020-27792 ghostscript: heap buffer over write vulnerability in GhostScript's lp8000_print_page() in gdevlp8k.c
+# https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=4f6bc662909a
+Patch030: 0001-Bug-701844-fixed-output-buffer-size-worst-case-in-lp.patch
+# RHEL-67051 CVE-2024-46954 ghostscript: Directory Traversal in Ghostscript via Overlong UTF-8 Encoding
+# implementing decode_utf8() https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=4fcf527584da2053
+# CVE fix, updated for gp_wutf8() in 9.27 https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=282f691f5e57b6b
+Patch031: 0001-Bug-705911-Fix-Ghostscript-s-encoding-decoding-of-UT.patch
+Patch032: 0001-Bug-707788-Fix-decode_utf8-to-forbid-overlong-encodi.patch
+# RHEL-67051 CVE-2024-46953 ghostscript: Path Traversal and Code Execution via Integer Overflow in Ghostscript
+# https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=1f21a45df0fa3abec
+Patch033: 0001-Bug-707793-Check-for-overflow-validating-format-stri.patch
+# RHEL-67051 CVE-2024-46956 ghostscript: Out-of-Bounds Data Access in Ghostscript Leads to Arbitrary Code Execution
+# https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=f4151f12db32cd3
+Patch034: 0001-PostScript-interpreter-fix-buffer-length-check.patch
 
 
 # Downstream patches -- these should be always included when doing rebase:
@@ -470,6 +490,14 @@ done
 # =============================================================================
 
 %changelog
+* Tue Apr 15 2025 Zdenek Dohnal <zdohnal@redhat.com> - 9.27-16
+- RHEL-18396 CVE-2023-46751 ghostscript: dangling pointer in gdev_prn_open_printer_seekable()
+- RHEL-67046 CVE-2024-46951 ghostscript: Arbitrary Code Execution in Artifex Ghostscript Pattern Color Space
+- RHEL-15067 CVE-2020-27792 ghostscript: heap buffer over write vulnerability in GhostScript's lp8000_print_page() in gdevlp8k.c
+- RHEL-67051 CVE-2024-46954 ghostscript: Directory Traversal in Ghostscript via Overlong UTF-8 Encoding
+- RHEL-67051 CVE-2024-46953 ghostscript: Path Traversal and Code Execution via Integer Overflow in Ghostscript
+- RHEL-67051 CVE-2024-46956 ghostscript: Out-of-Bounds Data Access in Ghostscript Leads to Arbitrary Code Execution
+
 * Mon Oct 14 2024 Zdenek Dohnal <zdohnal@redhat.com> - 9.27-15
 - fix printing PCL XL on some printers
 
