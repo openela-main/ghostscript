@@ -42,7 +42,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          9.54.0
-Release:          17%{?dist}
+Release:          18%{?dist}
 
 License:          AGPLv3+
 
@@ -113,7 +113,7 @@ Patch008: ghostscript-9.54.0-CVE-2023-28879.patch
 Patch009: ghostscript-9.54.0-CVE-2023-36664.patch
 Patch010: ghostscript-9.54.0-CVE-2023-38559.patch
 Patch011: ghostscript-9.54.0-CVE-2023-43115.patch
-# RHEL-39110 CVE-2024-33871 ghostscript: OPVP device arbitrary code execution via custom Driver library
+# RHEL-38839 CVE-2024-33871 ghostscript: OPVP device arbitrary code execution via custom Driver library
 Patch012: gs-cve-2024-33871.patch
 # RHEL-44759 CVE-2024-33870 ghostscript: path traversal to arbitrary files if the current directory is in the permitted paths
 Patch013: gs-CVE-2024-33870.patch
@@ -121,6 +121,23 @@ Patch013: gs-CVE-2024-33870.patch
 Patch014: gs-CVE-2024-33869.patch
 # RHEL-44731 CVE-2024-29510 ghostscript: format string injection leads to shell command execution (SAFER bypass)
 Patch015: 0001-Uniprint-device-prevent-string-configuration-changes.patch
+# RHEL-18397 CVE-2023-46751 ghostscript: dangling pointer in gdev_prn_open_printer_seekable()
+# partially taken from https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=dcdbc595c13c9
+Patch016: gs-cve-2023-46751.patch
+# RHEL-67048 CVE-2024-46951 ghostscript: Arbitrary Code Execution in Artifex Ghostscript Pattern Color Space
+# https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=f49812186baa7
+Patch017: 0001-PS-interpreter-check-the-type-of-the-Pattern-Impleme.patch
+# RHEL-67053 CVE-2024-46954 ghostscript: Directory Traversal in Ghostscript via Overlong UTF-8 Encoding
+# implementing decode_utf8() https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=4fcf527584da2053
+# CVE fix, updated for gp_wutf8() in 9.27 https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=282f691f5e57b6b
+Patch018: 0001-Bug-705911-Fix-Ghostscript-s-encoding-decoding-of-UT.patch
+Patch019: 0001-Bug-707788-Fix-decode_utf8-to-forbid-overlong-encodi.patch
+# RHEL-67053 CVE-2024-46953 ghostscript: Path Traversal and Code Execution via Integer Overflow in Ghostscript
+# https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=1f21a45df0fa3abec
+Patch020: 0001-Bug-707793-Check-for-overflow-validating-format-stri.patch
+# RHEL-67053 CVE-2024-46956 ghostscript: Out-of-Bounds Data Access in Ghostscript Leads to Arbitrary Code Execution
+# https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=f4151f12db32cd3
+Patch021: 0001-PostScript-interpreter-fix-buffer-length-check.patch
 
 # Downstream patches -- these should be always included when doing rebase:
 # ------------------
@@ -454,16 +471,20 @@ done
 # =============================================================================
 
 %changelog
+* Tue Apr 15 2025 Zdenek Dohnal <zdohnal@redhat.com> - 9.54.0-18
+- RHEL-18397 CVE-2023-46751 ghostscript: dangling pointer in gdev_prn_open_printer_seekable()
+- RHEL-67048 CVE-2024-46951 ghostscript: Arbitrary Code Execution in Artifex Ghostscript Pattern Color Space
+- RHEL-67053 CVE-2024-46954 ghostscript: Directory Traversal in Ghostscript via Overlong UTF-8 Encoding
+- RHEL-67053 CVE-2024-46953 ghostscript: Path Traversal and Code Execution via Integer Overflow in Ghostscript
+- RHEL-67053 CVE-2024-46956 ghostscript: Out-of-Bounds Data Access in Ghostscript Leads to Arbitrary Code Execution
+
 * Mon Jul 08 2024 Zdenek Dohnal <zdohnal@redhat.com> - 9.54.0-17
 - RHEL-44759 CVE-2024-33870 ghostscript: path traversal to arbitrary files if the current directory is in the permitted paths
 - RHEL-44745 CVE-2024-33869 ghostscript: path traversal and command execution due to path reduction
 - RHEL-44731 CVE-2024-29510 ghostscript: format string injection leads to shell command execution (SAFER bypass)
 
-* Thu Jun 13 2024 Zdenek Dohnal <zdohnal@redhat.com> - 9.54.0-16
-- RHEL-39110 fix regression discovered in OPVP device
-
-* Fri Jun 07 2024 Zdenek Dohnal <zdohnal@redhat.com> - 9.54.0-15
-- RHEL-39110 CVE-2024-33871 ghostscript: OPVP device arbitrary code execution via custom Driver library
+* Thu Jun 20 2024 Zdenek Dohnal <zdohnal@redhat.com> - 9.54.0-16
+- RHEL-38839 CVE-2024-33871 ghostscript: OPVP device arbitrary code execution via custom Driver library
 
 * Fri Oct 27 2023 Richard Lescak <rlescak@redhat.com> - 9.54.0-14
 - fix for CVE-2023-43115

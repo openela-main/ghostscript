@@ -1,0 +1,13 @@
+diff --git a/psi/zfile.c b/psi/zfile.c
+index 05b8203..ee40a75 100644
+--- a/psi/zfile.c
++++ b/psi/zfile.c
+@@ -437,7 +437,7 @@ file_continue(i_ctx_t *i_ctx_p)
+         if (code == ~(uint) 0) {    /* all done */
+             esp -= 5;               /* pop proc, pfen, devlen, iodev , mark */
+             return o_pop_estack;
+-        } else if (code > len) {      /* overran string */
++        } else if (code > len - devlen) {      /* overran string */
+             return_error(gs_error_rangecheck);
+         }
+         else if (iodev != iodev_default(imemory)
