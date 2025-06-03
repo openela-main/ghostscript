@@ -1,0 +1,22 @@
+diff --git a/contrib/japanese/gdevnpdl.c b/contrib/japanese/gdevnpdl.c
+index 597ecc8..0aa5128 100644
+--- a/contrib/japanese/gdevnpdl.c
++++ b/contrib/japanese/gdevnpdl.c
+@@ -580,7 +580,7 @@ npdl_print_page_copies(gx_device_printer * pdev, FILE * prn_stream, int num_copi
+     int code;
+     int maxY = lprn->BlockLine / lprn->nBh * lprn->nBh;
+ 
+-    if (!(lprn->CompBuf = gs_malloc(pdev->memory->non_gc_memory, line_size * maxY, sizeof(byte), "npdl_print_page_copies(CompBuf)")))
++    if (!(lprn->CompBuf = gs_malloc(pdev->memory->non_gc_memory, line_size, maxY, "npdl_print_page_copies(CompBuf)")))
+         return_error(gs_error_VMerror);
+ 
+         /* Initialize printer */
+@@ -675,7 +675,7 @@ npdl_print_page_copies(gx_device_printer * pdev, FILE * prn_stream, int num_copi
+     /* Form Feed */
+     fputs("\014", prn_stream);
+ 
+-    gs_free(pdev->memory->non_gc_memory, lprn->CompBuf, line_size * maxY, sizeof(byte), "npdl_print_page_copies(CompBuf)");
++    gs_free(pdev->memory->non_gc_memory, lprn->CompBuf, line_size, maxY, "npdl_print_page_copies(CompBuf)");
+     return 0;
+ }
+ 

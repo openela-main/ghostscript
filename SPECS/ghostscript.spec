@@ -37,7 +37,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          9.27
-Release:          16%{?dist}
+Release:          17%{?dist}
 
 License:          AGPLv3+
 
@@ -150,6 +150,9 @@ Patch033: 0001-Bug-707793-Check-for-overflow-validating-format-stri.patch
 # RHEL-67051 CVE-2024-46956 ghostscript: Out-of-Bounds Data Access in Ghostscript Leads to Arbitrary Code Execution
 # https://cgit.ghostscript.com/cgi-bin/cgit.cgi/ghostpdl.git/commit/?id=f4151f12db32cd3
 Patch034: 0001-PostScript-interpreter-fix-buffer-length-check.patch
+# RHEL-88965 CVE-2025-27832 ghostscript: NPDL device: Compression buffer overflow
+# https://github.com/ArtifexSoftware/ghostpdl/commit/57291c8463
+Patch035: 0001-Bug-708133-Avoid-integer-overflow-leading-to-buffer-.patch
 
 
 # Downstream patches -- these should be always included when doing rebase:
@@ -490,6 +493,9 @@ done
 # =============================================================================
 
 %changelog
+* Wed May 07 2025 Zdenek Dohnal <zdohnal@redhat.com> - 9.27-17
+- RHEL-88965 CVE-2025-27832 ghostscript: NPDL device: Compression buffer overflow
+
 * Tue Apr 15 2025 Zdenek Dohnal <zdohnal@redhat.com> - 9.27-16
 - RHEL-18396 CVE-2023-46751 ghostscript: dangling pointer in gdev_prn_open_printer_seekable()
 - RHEL-67046 CVE-2024-46951 ghostscript: Arbitrary Code Execution in Artifex Ghostscript Pattern Color Space
