@@ -1,0 +1,36 @@
+From f4151f12db32cd3ed26c24327de714bf2c3ed6ca Mon Sep 17 00:00:00 2001
+From: Zdenek Hutyra <zhutyra@centrum.cz>
+Date: Tue, 23 Jul 2024 11:48:39 +0100
+Subject: [PATCH] PostScript interpreter - fix buffer length check
+
+Bug 707895
+
+See bug report for details.
+
+CVE-2024-46956
+---
+ psi/zfile.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/psi/zfile.c b/psi/zfile.c
+index a4f5439cd..cb056494b 100644
+--- a/psi/zfile.c
++++ b/psi/zfile.c
+@@ -1,4 +1,4 @@
+-/* Copyright (C) 2001-2023 Artifex Software, Inc.
++/* Copyright (C) 2001-2024 Artifex Software, Inc.
+    All Rights Reserved.
+ 
+    This software is provided AS-IS with no warranty, either express or
+@@ -443,7 +443,7 @@ file_continue(i_ctx_t *i_ctx_p)
+         if (code == ~(uint) 0) {    /* all done */
+             esp -= 6;               /* pop proc, pfen, scratch, devlen, iodev , mark */
+             return o_pop_estack;
+-        } else if (code > len) {      /* overran string */
++        } else if (code > len - devlen) {      /* overran string */
+             return_error(gs_error_rangecheck);
+         }
+         else if (iodev != iodev_default(imemory)
+-- 
+2.49.0
+

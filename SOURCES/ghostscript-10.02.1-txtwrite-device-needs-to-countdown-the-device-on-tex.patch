@@ -1,0 +1,31 @@
+From ea661034db7eb667375981dae883d0c9e7d79799 Mon Sep 17 00:00:00 2001
+Message-ID: <ea661034db7eb667375981dae883d0c9e7d79799.1699398536.git.mjg@fedoraproject.org>
+From: Ken Sharp <Ken.Sharp@artifex.com>
+Date: Mon, 18 Sep 2023 17:40:18 +0100
+Subject: [PATCH] txtwrite device - needs to countdown the device on
+ text_release
+
+Bug #707132 "Error: finalizing subclassing device while child refcount > 1"
+
+The txtwrite device calls gs_text_enum_init() which counts up the
+device, but does not count it down again when the enumertor is
+released. Fixed here.
+---
+ devices/vector/gdevtxtw.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/devices/vector/gdevtxtw.c b/devices/vector/gdevtxtw.c
+index f64284f07..089d32f7e 100644
+--- a/devices/vector/gdevtxtw.c
++++ b/devices/vector/gdevtxtw.c
+@@ -2059,6 +2059,7 @@ textw_text_release(gs_text_enum_t *pte, client_name_t cname)
+         gs_free(tdev->memory, penum->text_state, 1, sizeof(penum->text_state), "txtwrite free text state");
+         penum->text_state = NULL;
+     }
++    rc_decrement_only(pte->dev, "textw_text_release");
+ }
+ 
+ /* This is the list of methods for the text enumerator */
+-- 
+2.43.0.rc0.447.g76a1efa614
+

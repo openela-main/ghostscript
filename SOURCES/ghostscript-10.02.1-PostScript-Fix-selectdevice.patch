@@ -1,0 +1,33 @@
+From 2febe352146a62c77d62a5b5dde9607f66575d14 Mon Sep 17 00:00:00 2001
+Message-ID: <2febe352146a62c77d62a5b5dde9607f66575d14.1699398720.git.mjg@fedoraproject.org>
+From: Ken Sharp <Ken.Sharp@artifex.com>
+Date: Mon, 6 Nov 2023 15:30:18 +0000
+Subject: [PATCH] PostScript - Fix selectdevice
+
+Bug 707310 "`selectdevice` no longer works"
+
+This was an oversight. Fixed here.
+
+In future I anticipate removing selectdevice as well, as it doesn't do
+anything that can't be done using setpagedevice (and .defaultscreen).
+However, it is currently documented, so this restores the behaviour.
+---
+ Resource/Init/gs_init.ps | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Resource/Init/gs_init.ps b/Resource/Init/gs_init.ps
+index 958e8247c..d6b55efb2 100644
+--- a/Resource/Init/gs_init.ps
++++ b/Resource/Init/gs_init.ps
+@@ -871,7 +871,7 @@ currentdict /.makeinternaldict .undef
+           ifelse
+         } bind def
+ /selectdevice
+-        { finddevice setdevice .setdefaultscreen } bind def
++        { finddevice setdevice .setdefaultscreen } bind odef
+ /signalerror		% <object> <errorname> signalerror -
+         { /errordict .systemvar exch get exec } bind def
+ /signaloperror {	% <object> <errorname> signaloperror -
+-- 
+2.43.0.rc0.447.g76a1efa614
+
