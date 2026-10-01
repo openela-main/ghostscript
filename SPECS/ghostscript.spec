@@ -45,7 +45,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          10.02.1
-Release:          16%{?dist}
+Release:          16%{?dist}.1
 
 License:          AGPL-3.0-or-later
 
@@ -147,6 +147,10 @@ Patch: 0001-PostScript-interpreter-fix-buffer-length-check.patch
 # RHEL-88964 CVE-2025-27832 ghostscript: NPDL device: Compression buffer overflow
 # https://github.com/ArtifexSoftware/ghostpdl/commit/57291c846334f1585552010faa42d7cb2cbd5c41
 Patch: 0001-Bug-708133-Avoid-integer-overflow-leading-to-buffer-.patch
+# RHEL-264925 CVE-2026-39919 ghostscript: Heap buffer overflow in JPEG 2000 JPXDecode output adapter
+# https://redhat.atlassian.net/browse/RHEL-264925
+# https://github.com/ArtifexSoftware/ghostpdl/commit/0a8bf88e39db07b0751a58d6ec1cf992073e4dc1
+Patch: 0001-OpenJPEG-Fix-overreading-bytes-in-some-conditions.patch
 
 
 # Downstream patches -- these should be always included when doing rebase:
@@ -464,6 +468,10 @@ done
 # =============================================================================
 
 %changelog
+* Mon Sep 21 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 10.02.1-16.1
+- RHEL-264925 CVE-2026-39919 ghostscript: Heap buffer overflow in JPEG 2000
+  JPXDecode output adapter
+
 * Wed May 07 2025 Zdenek Dohnal <zdohnal@redhat.com> - 10.02.1-16
 - RHEL-88964 CVE-2025-27832 ghostscript: NPDL device: Compression buffer overflow
 
