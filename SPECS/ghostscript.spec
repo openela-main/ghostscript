@@ -45,7 +45,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          10.02.1
-Release:          16%{?dist}.1
+Release:          16%{?dist}.3
 
 License:          AGPL-3.0-or-later
 
@@ -151,6 +151,20 @@ Patch: 0001-Bug-708133-Avoid-integer-overflow-leading-to-buffer-.patch
 # https://redhat.atlassian.net/browse/RHEL-264925
 # https://github.com/ArtifexSoftware/ghostpdl/commit/0a8bf88e39db07b0751a58d6ec1cf992073e4dc1
 Patch: 0001-OpenJPEG-Fix-overreading-bytes-in-some-conditions.patch
+# RHEL-277015 CVE-2026-101258 ghostscript: -dSAFER sandbox bypass via Type 5 shading OOB write and procedure-stream use-after-free
+# https://issues.redhat.com/browse/RHEL-277015
+# 3 patches - 1. fix for related use-after-free, 2. OOB which is exploitable, 3. unrelated by not
+# harmful use-after-free fix
+# https://github.com/ArtifexSoftware/ghostpdl/commit/9d8b70ad1301c9993155dcf53401df3eac14fa4f
+# https://github.com/ArtifexSoftware/ghostpdl/commit/3d8a1db60895493d73aeef89903d34da9837bc0a
+# https://github.com/ArtifexSoftware/ghostpdl/commit/675e66218b9a61247561f0d92acc5fa3e85b0ff5
+Patch: 0001-PostScript-interpreter-don-t-permit-local-inside-glo.patch
+Patch: 0001-graphics-library-Shadings-with-arrays-of-Functions-v.patch
+Patch: 0001-PostScript-interpreter-procedural-data-sink-filter-d.patch
+# RHEL-273950 CVE-2026-103226 pdfwrite: bound check control stack in type 1->2 font conversion
+# https://issues.redhat.com/browse/RHEL-273950
+# https://github.com/ArtifexSoftware/ghostpdl/commit/b7f00164d663426a1780b3cc5c88f63165ccebc4
+Patch: 0001-pdfwrite-bound-check-control-stack-in-type-1-2-font-.patch
 
 
 # Downstream patches -- these should be always included when doing rebase:
@@ -468,6 +482,14 @@ done
 # =============================================================================
 
 %changelog
+* Mon Oct 12 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 10.02.1-16.3
+- CVE-2026-103226 ghostscript: ghostscript: stack-based buffer overflow
+  in pdfwrite via crafted font data
+
+* Mon Oct 12 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 10.02.1-16.2
+- CVE-2026-101258 ghostscript: ghostscript: -dSAFER sandbox bypass via Type 5 shading OOB write and procedure-stream use-after-free
+  bypass via Type 5 shading OOB write and procedure-stream use-after-free
+
 * Mon Sep 21 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 10.02.1-16.1
 - RHEL-264925 CVE-2026-39919 ghostscript: Heap buffer overflow in JPEG 2000
   JPXDecode output adapter

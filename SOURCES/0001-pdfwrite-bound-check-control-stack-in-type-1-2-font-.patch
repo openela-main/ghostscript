@@ -1,0 +1,37 @@
+From a63cc07b937ece44fd4a81929899a3232946241d Mon Sep 17 00:00:00 2001
+From: Ken Sharp <Ken.Sharp@artifex.com>
+Date: Tue, 25 Aug 2026 14:33:48 +0100
+Subject: [PATCH] pdfwrite - bound check control stack in type 1->2 font
+ conversion
+
+Bug #709672 "Stack buffer overflow in gdevpsfx.c type1_callsubr(): unbounded ipstack push in pdfwrite Type 1->2 font converter (all versions since 8.00, unfixed in master)"
+
+A deeply nested subr could fall off the end of the control stack. Check
+the control stack before handling the subr by using the defined macro.
+
+Reported by lanlanwhh <lanlanwhh@163.com>
+
+This differs from the suggested fix in the bug report by doing the check
+in the main interpreter control loop, not the callsubr function. Which
+is why the commit is not attributed to lanlanwh, if the fix is wrong
+then its my responsibility, not theirs.
+
+There is nothing wrong per se with the proposed patch, but this matches
+the 'normal' pattern for font parsing in our code.
+---
+ devices/vector/gdevpsfx.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/devices/vector/gdevpsfx.c b/devices/vector/gdevpsfx.c
+index 5e877b4b7..24e143e1e 100644
+--- a/devices/vector/gdevpsfx.c
++++ b/devices/vector/gdevpsfx.c
+@@ -230,6 +230,8 @@ type1_next(gs_type1_state *pcis)
+         case c_undef17:
+             return_error(gs_error_invalidfont);
+         case c_callsubr:
++            /* Check there is space available on the control stack */
++            CS_CHECK_IPSTACK(ipsp + 1, pcis->ipstack);
+             code = type1_callsubr(pcis, fixed2int_var(*csp) +
+                                   pcis->pfont->data.subroutineNumberBias);
+             if (code < 0)
