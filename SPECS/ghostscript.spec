@@ -37,7 +37,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          9.27
-Release:          19%{?dist}
+Release:          20%{?dist}
 
 License:          AGPLv3+
 
@@ -172,6 +172,10 @@ Patch038: 0001-PostScript-interpreter-don-t-permit-local-inside-glo.patch
 Patch039: 0001-graphics-library-Shadings-with-arrays-of-Functions-v.patch
 Patch040: 0001-PostScript-interpreter-procedural-data-sink-filter-d.patch
 
+# RHEL-287250 CVE-2026-112177 remove .forceput from /.charkeys
+# https://issues.redhat.com/browse/RHEL-287250
+# https://github.com/ArtifexSoftware/ghostpdl/commit/485904772c5f0aa1140032746e5a0abfc40f4cef
+Patch041: 0001-Bug-701841-remove-.forceput-from-.charkeys.patch
 
 # Downstream patches -- these should be always included when doing rebase:
 # ------------------
@@ -511,6 +515,10 @@ done
 # =============================================================================
 
 %changelog
+* Tue Oct 20 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 9.27-20
+- CVE-2026-112177 ghostscript: Reintroduction of .charkeys -dSAFER bypass in RHEL 8
+  -dSAFER bypass in RHEL 8
+
 * Mon Oct 12 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 9.27-19
 - CVE-2026-101258 ghostscript: ghostscript: -dSAFER sandbox bypass via Type 5 shading OOB write and procedure-stream use-after-free
   via Type 5 shading OOB write and procedure-stream use-after-free
