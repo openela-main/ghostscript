@@ -42,7 +42,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          9.54.0
-Release:          19%{?dist}.3
+Release:          20%{?dist}.1
 
 License:          AGPLv3+
 
@@ -141,27 +141,32 @@ Patch021: 0001-PostScript-interpreter-fix-buffer-length-check.patch
 # RHEL-88966 CVE-2025-27832 ghostscript: NPDL device: Compression buffer overflow
 # https://github.com/ArtifexSoftware/ghostpdl/commit/57291c84633
 Patch022: 0001-Bug-708133-Avoid-integer-overflow-leading-to-buffer-.patch
-# RHEL-264921 CVE-2026-39919 ghostscript: Heap buffer overflow in JPEG 2000 (JPXDecode) output adapter
-# https://redhat.atlassian.net/browse/RHEL-264921
+# RHEL-264922 CVE-2026-39919 ghostscript: Heap buffer overflow in JPEG 2000 (JPXDecode) output adapter
+# https://redhat.atlassian.net/browse/RHEL-264922
 # https://github.com/ArtifexSoftware/ghostpdl/commit/0a8bf88e39db07b0751a58d6ec1cf992073e4dc1
 # adjusted: adapted in_offset_scaled calculation to downstream code structure
 Patch023: 0001-OpenJPEG-Fix-overreading-bytes-in-some-conditions.patch
-# RHEL-277008 CVE-2026-101258 -dSAFER sandbox bypass via Type 5 shading OOB write and procedure-stream use-after-free
+# RHEL-277014 CVE-2026-101258 -dSAFER sandbox bypass via Type 5 shading OOB write and procedure-stream use-after-free
 # 3 patches - 1. related use-after-freefix , 2. fix for OOB read, 3. unrelated, but not harmful
 # use-after-free fix
-# https://issues.redhat.com/browse/RHEL-277008
+# https://issues.redhat.com/browse/RHEL-277014
 # https://github.com/ArtifexSoftware/ghostpdl/commit/9d8b70ad1301c9993155dcf53401df3eac14fa4f
 # https://github.com/ArtifexSoftware/ghostpdl/commit/3d8a1db60895493d73aeef89903d34da9837bc0a
 # https://github.com/ArtifexSoftware/ghostpdl/commit/675e66218b9a61247561f0d92acc5fa3e85b0ff5
 Patch024: 0001-PostScript-interpreter-don-t-permit-local-inside-glo.patch
 Patch025: 0001-graphics-library-Shadings-with-arrays-of-Functions-v.patch
 Patch026: 0001-PostScript-interpreter-procedural-data-sink-filter-d.patch
-
-# RHEL-273957 CVE-2026-103226 pdfwrite: stack buffer overflow in type 1->2 font conversion
-# https://issues.redhat.com/browse/RHEL-273957
+# RHEL-273958 CVE-2026-103226 pdfwrite: stack buffer overflow in type 1->2 font conversion
+# https://issues.redhat.com/browse/RHEL-273958
 # https://github.com/ArtifexSoftware/ghostpdl/commit/b7f00164d663426a1780b3cc5c88f63165ccebc4
 # adjusted: removed upstream context from intermediate commit c05b7b979 (csp bounds check) not present in 9.54.0
 Patch027: 0001-pdfwrite-bound-check-control-stack-in-type-1-2-font-.patch
+# RHEL-313223 CVE-2026-125396 PS interpreter: validate operands to .putgstringcopy (.forceput recovery under -dSAFER)
+# https://issues.redhat.com/browse/RHEL-313223
+# https://github.com/ArtifexSoftware/ghostpdl/commit/1484854e0c8ddfda1baa4ad4cd965b8a9790aa81
+# adjusted: regenerated as text diff (upstream .patch is a GIT binary delta), dropped copyright-year hunk,
+# kept downstream '} .bind executeonly odef' terminator instead of upstream '} .forcebind odef'
+Patch028: 0001-PS-interpreter-validate-operands-to-.putgstringcopy.patch
 
 # Downstream patches -- these should be always included when doing rebase:
 # ------------------
@@ -495,17 +500,16 @@ done
 # =============================================================================
 
 %changelog
-* Mon Oct 12 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 9.54.0-19.3
-- RHEL-273957 CVE-2026-103226 ghostscript: ghostscript: stack-based
-  buffer overflow in pdfwrite via crafted font data
+* Mon Nov 23 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 9.54.0-20.1
+- CVE-2026-125396 ghostscript: Ghostscript: Arbitrary code execution via SAFER sandbox bypass
 
-* Mon Oct 12 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 9.54.0-19.2
+* Thu Oct 15 2026 Zdenek Dohnal <zdohnal@redhat.com> - 9.54.0-20
+- RHEL-264922 CVE-2026-39919 ghostscript: Heap buffer overflow in
+  JPEG 2000 (JPXDecode) output adapter
 - CVE-2026-101258 ghostscript: ghostscript: -dSAFER sandbox bypass via Type 5 shading OOB write and procedure-stream use-after-free
   via Type 5 shading OOB write and procedure-stream use-after-free
-
-* Mon Sep 21 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 9.54.0-19.1
-- RHEL-264921 CVE-2026-39919 ghostscript: Heap buffer overflow in
-  JPEG 2000 (JPXDecode) output adapter
+- RHEL-273958 CVE-2026-103226 ghostscript: ghostscript: stack-based
+  buffer overflow in pdfwrite via crafted font data
 
 * Wed May 07 2025 Zdenek Dohnal <zdohnal@redhat.com> - 9.54.0-19
 - RHEL-88966 CVE-2025-27832 ghostscript: NPDL device: Compression buffer overflow
