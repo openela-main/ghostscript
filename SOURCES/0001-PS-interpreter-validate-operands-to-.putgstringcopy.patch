@@ -1,0 +1,59 @@
+From c76f63fe8d26bf75dda63f850073b48e4cf8cde4 Mon Sep 17 00:00:00 2001
+From: Ken Sharp <Ken.Sharp@artifex.com>
+Date: Wed, 2 Sep 2026 12:04:15 +0100
+Subject: [PATCH] PS interpreter - validate operands to .putgstringcopy
+
+Bug #709684 "Type 1 font-loader `.forceput` save/restore UAF yields native read/write and controlled dispatch/RCE under `-dSAFER`"
+
+Effectively another case of recovering .forceput, in this case by
+causing an error and then having the error handler use it.
+
+We are in the process of eliminating, or at least absolutely minimising,
+the use of .forceput. Ideally we want to remove it completely precisely
+to avoid this sort of thing. Unfortunately that's still a work in
+progress; it isn't easy to undo 30 years worth of assumptions in the
+code.
+
+For now this prevents the problem by ensuring that the operands are the
+correct types, which prevents the error executing 'copy' and so avoids
+the custom error handler managing to execute .forceput.
+
+This issue was reported by Paulos Yibelo <habte.yibelo@gmail.com>
+---
+ Resource/Init/gs_fonts.ps | 23 +++++++++++++++--------
+ 1 file changed, 15 insertions(+), 8 deletions(-)
+
+diff --git a/Resource/Init/gs_fonts.ps b/Resource/Init/gs_fonts.ps
+index c47f6e577..0170e268b 100644
+--- a/Resource/Init/gs_fonts.ps
++++ b/Resource/Init/gs_fonts.ps
+@@ -976,14 +976,21 @@ $error /SubstituteFont { } put
+ 
+ % any user of .putgstringcopy must use bind and executeonly
+ /.putgstringcopy  %   <dict> <name> <string> .putgstringcopy -
+-{ 2 index gcheck currentglobal
+-  2 copy eq {
+-    pop pop .forceput
+-  } executeonly {
+-    5 1 roll setglobal
+-    dup length string copy
+-    .forceput setglobal
+-  } executeonly ifelse
++{
++  % Check operand types
++  dup type /stringtype eq 2 index type /nametype eq and 3 index type /dicttype eq and {
++    2 index gcheck currentglobal
++    2 copy eq {
++      pop pop .forceput
++    } executeonly {
++      5 1 roll setglobal
++      dup length string copy
++      .forceput setglobal
++    } executeonly ifelse
++  }
++  {
++      /.putgstringcopy cvx /typecheck signalerror
++  } ifelse
+ } .bind executeonly odef % must be bound and hidden for .forceput
+ 
+ /.loadfontloop {        % <fontname> <filename> <libflag> .loadfontloop

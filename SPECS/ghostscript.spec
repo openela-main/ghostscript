@@ -37,7 +37,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          9.27
-Release:          20%{?dist}
+Release:          21%{?dist}
 
 License:          AGPLv3+
 
@@ -176,6 +176,12 @@ Patch040: 0001-PostScript-interpreter-procedural-data-sink-filter-d.patch
 # https://issues.redhat.com/browse/RHEL-287250
 # https://github.com/ArtifexSoftware/ghostpdl/commit/485904772c5f0aa1140032746e5a0abfc40f4cef
 Patch041: 0001-Bug-701841-remove-.forceput-from-.charkeys.patch
+
+# RHEL-313210 CVE-2026-125396 validate operands to .putgstringcopy
+# https://issues.redhat.com/browse/RHEL-313210
+# https://github.com/ArtifexSoftware/ghostpdl/commit/a5d596bb0ac2339a150494191d6f82e6f5fad470
+# adjusted: dropped copyright-year hunk and kept '.bind executeonly odef' (9.27 has no .forcebind)
+Patch042: 0001-PS-interpreter-validate-operands-to-.putgstringcopy.patch
 
 # Downstream patches -- these should be always included when doing rebase:
 # ------------------
@@ -515,6 +521,9 @@ done
 # =============================================================================
 
 %changelog
+* Mon Nov 23 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 9.27-21
+- CVE-2026-125396 ghostscript: Ghostscript: Arbitrary code execution via SAFER sandbox bypass
+
 * Tue Oct 20 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 9.27-20
 - CVE-2026-112177 ghostscript: Reintroduction of .charkeys -dSAFER bypass in RHEL 8
   -dSAFER bypass in RHEL 8
