@@ -45,7 +45,7 @@
 Name:             ghostscript
 Summary:          Interpreter for PostScript language & PDF
 Version:          10.02.1
-Release:          16%{?dist}.3
+Release:          17%{?dist}.1
 
 License:          AGPL-3.0-or-later
 
@@ -147,12 +147,12 @@ Patch: 0001-PostScript-interpreter-fix-buffer-length-check.patch
 # RHEL-88964 CVE-2025-27832 ghostscript: NPDL device: Compression buffer overflow
 # https://github.com/ArtifexSoftware/ghostpdl/commit/57291c846334f1585552010faa42d7cb2cbd5c41
 Patch: 0001-Bug-708133-Avoid-integer-overflow-leading-to-buffer-.patch
-# RHEL-264925 CVE-2026-39919 ghostscript: Heap buffer overflow in JPEG 2000 JPXDecode output adapter
-# https://redhat.atlassian.net/browse/RHEL-264925
+# RHEL-264926 CVE-2026-39919 ghostscript: Heap buffer overflow in JPEG 2000 JPXDecode output adapter
+# https://redhat.atlassian.net/browse/RHEL-264926
 # https://github.com/ArtifexSoftware/ghostpdl/commit/0a8bf88e39db07b0751a58d6ec1cf992073e4dc1
 Patch: 0001-OpenJPEG-Fix-overreading-bytes-in-some-conditions.patch
-# RHEL-277015 CVE-2026-101258 ghostscript: -dSAFER sandbox bypass via Type 5 shading OOB write and procedure-stream use-after-free
-# https://issues.redhat.com/browse/RHEL-277015
+# RHEL-277016 CVE-2026-101258 ghostscript: -dSAFER sandbox bypass via Type 5 shading OOB write and procedure-stream use-after-free
+# https://issues.redhat.com/browse/RHEL-277016
 # 3 patches - 1. fix for related use-after-free, 2. OOB which is exploitable, 3. unrelated by not
 # harmful use-after-free fix
 # https://github.com/ArtifexSoftware/ghostpdl/commit/9d8b70ad1301c9993155dcf53401df3eac14fa4f
@@ -161,10 +161,16 @@ Patch: 0001-OpenJPEG-Fix-overreading-bytes-in-some-conditions.patch
 Patch: 0001-PostScript-interpreter-don-t-permit-local-inside-glo.patch
 Patch: 0001-graphics-library-Shadings-with-arrays-of-Functions-v.patch
 Patch: 0001-PostScript-interpreter-procedural-data-sink-filter-d.patch
-# RHEL-273950 CVE-2026-103226 pdfwrite: bound check control stack in type 1->2 font conversion
-# https://issues.redhat.com/browse/RHEL-273950
+# RHEL-273951 CVE-2026-103226 pdfwrite: bound check control stack in type 1->2 font conversion
+# https://issues.redhat.com/browse/RHEL-273951
 # https://github.com/ArtifexSoftware/ghostpdl/commit/b7f00164d663426a1780b3cc5c88f63165ccebc4
 Patch: 0001-pdfwrite-bound-check-control-stack-in-type-1-2-font-.patch
+# RHEL-313216 CVE-2026-125396 PS interpreter: validate operands to .putgstringcopy
+# https://issues.redhat.com/browse/RHEL-313216
+# https://github.com/ArtifexSoftware/ghostpdl/commit/a5d596bb0ac2339a150494191d6f82e6f5fad470
+# adjusted: kept downstream '} .bind executeonly odef' terminator instead of upstream '.forcebind odef',
+# which is not available in 10.02.1; patch regenerated as text (upstream git treats gs_fonts.ps as binary)
+Patch: 0001-PS-interpreter-validate-operands-to-.putgstringcopy.patch
 
 
 # Downstream patches -- these should be always included when doing rebase:
@@ -482,17 +488,16 @@ done
 # =============================================================================
 
 %changelog
-* Mon Oct 12 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 10.02.1-16.3
-- CVE-2026-103226 ghostscript: ghostscript: stack-based buffer overflow
-  in pdfwrite via crafted font data
+* Mon Nov 23 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 10.02.1-17.1
+- CVE-2026-125396 ghostscript: Ghostscript: Arbitrary code execution via SAFER sandbox bypass
 
-* Mon Oct 12 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 10.02.1-16.2
+* Thu Oct 15 2026 Zdenek Dohnal <zdohnal@redhat.com> - 10.02.1-17
+- RHEL-264926 CVE-2026-39919 ghostscript: Heap buffer overflow in JPEG 2000
+  JPXDecode output adapter
 - CVE-2026-101258 ghostscript: ghostscript: -dSAFER sandbox bypass via Type 5 shading OOB write and procedure-stream use-after-free
   bypass via Type 5 shading OOB write and procedure-stream use-after-free
-
-* Mon Sep 21 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 10.02.1-16.1
-- RHEL-264925 CVE-2026-39919 ghostscript: Heap buffer overflow in JPEG 2000
-  JPXDecode output adapter
+- CVE-2026-103226 ghostscript: ghostscript: stack-based buffer overflow
+  in pdfwrite via crafted font data
 
 * Wed May 07 2025 Zdenek Dohnal <zdohnal@redhat.com> - 10.02.1-16
 - RHEL-88964 CVE-2025-27832 ghostscript: NPDL device: Compression buffer overflow
